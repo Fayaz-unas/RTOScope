@@ -9,7 +9,7 @@ cmake_path(APPEND conf_file_path ${CMAKE_CURRENT_LIST_DIR} ${board} prj.conf)
 set(CONF_FILE ${conf_file_path} ${CONF_FILE})
 include(${SdkRootDirPath}/cmake/extension/mcux.cmake)
 
-project(RTOScope_firmware LANGUAGES C CXX ASM PROJECT_BOARD_PORT_PATH ${board_root}/${board}/freertos_examples/freertos_hello)
+project(RTOScope LANGUAGES C CXX ASM PROJECT_BOARD_PORT_PATH ${board_root}/${board}/freertos_examples/freertos_hello)
 
 include(${SdkRootDirPath}/CMakeLists.txt)
 

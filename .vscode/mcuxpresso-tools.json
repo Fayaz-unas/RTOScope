@@ -5,7 +5,7 @@
   "trustZoneType": "none",
   "multicoreType": "none",
   "projectType": "sdk-v2-freestanding",
-  "projectName": "RTOScope_firmware",
+  "projectName": "RTOScope",
   "sdk": {
     "version": "26.6.0",
     "path": "c:\\nxp\\sdks\\SDK_26_06_00_FRDM-MCXN236",
