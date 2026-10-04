@@ -1,0 +1,16 @@
+{
+  "version": "25.3",
+  "toolchainPath": "${userHome}/.mcuxpressotools/arm-gnu-toolchain-14.2.rel1-mingw-w64-x86_64-arm-none-eabi",
+  "linkedProjects": [],
+  "trustZoneType": "none",
+  "multicoreType": "none",
+  "projectType": "sdk-v2-freestanding",
+  "projectName": "RTOScope_firmware",
+  "sdk": {
+    "version": "26.6.0",
+    "path": "c:\\nxp\\sdks\\SDK_26_06_00_FRDM-MCXN236",
+    "boardId": "frdmmcxn236",
+    "deviceId": "MCXN236",
+    "coreId": "cm33_core0"
+  }
+}

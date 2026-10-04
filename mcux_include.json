@@ -1,0 +1,35 @@
+{
+  "version": 7,
+  "cmakeMinimumRequired": {
+    "major": 3
+  },
+  "configurePresets": [
+    {
+      "name": "debug-env",
+      "displayName": "debug-env",
+      "hidden": true,
+      "environment": {
+        "ARMGCC_DIR": "C:/Users/fayaz/.mcuxpressotools/arm-gnu-toolchain-14.2.rel1-mingw-w64-x86_64-arm-none-eabi",
+        "SdkRootDirPath": "c:/nxp/sdks/SDK_26_06_00_FRDM-MCXN236",
+        "MCUX_VENV_PATH": "C:/Users/fayaz/.mcuxpressotools/.mcux-venv-3.12/Scripts",
+        "PATH": "$env{MCUX_VENV_PATH}${pathListSep}$penv{PATH}",
+        "POSTPROCESS_UTILITY": "C:/Users/fayaz/.mcuxpressotools/mcux-fixelf-14.2.2/mcux-fixelf.exe",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      },
+      "cacheVariables": {}
+    },
+    {
+      "name": "release-env",
+      "displayName": "release-env",
+      "hidden": true,
+      "environment": {
+        "ARMGCC_DIR": "C:/Users/fayaz/.mcuxpressotools/arm-gnu-toolchain-14.2.rel1-mingw-w64-x86_64-arm-none-eabi",
+        "SdkRootDirPath": "c:/nxp/sdks/SDK_26_06_00_FRDM-MCXN236",
+        "MCUX_VENV_PATH": "C:/Users/fayaz/.mcuxpressotools/.mcux-venv-3.12/Scripts",
+        "PATH": "$env{MCUX_VENV_PATH}${pathListSep}$penv{PATH}"
+      },
+      "cacheVariables": {}
+    }
+  ],
+  "buildPresets": []
+}

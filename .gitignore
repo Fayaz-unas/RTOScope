@@ -1,0 +1,60 @@
+# ==============================================================================
+# RTOScope - .gitignore
+# Target: NXP FRDM-MCXN236 (Dual Cortex-M33) + FreeRTOS + VS Code + CMake
+# ==============================================================================
+
+# MCUXpresso SDK Local Junction / Symlink
+# Points to local SDK directory (e.g. C:\nxp\sdks\SDK_26_06_00_FRDM-MCXN236)
+__repo__
+__repo__/
+
+# Build Directories & CMake Presets
+debug/
+release/
+build/
+bin/
+obj/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+*.ninja
+*.ninja_deps
+*.ninja_log
+CMakeUserPresets.json
+
+# Toolchain Output Files, Objects, and Maps
+*.elf
+*.bin
+*.hex
+*.axf
+*.srec
+*.o
+*.obj
+*.d
+*.su
+*.map
+*.dump
+*.log
+
+# LinkServer / GDB / Probe Session Logs
+*.linkserver*
+.linkserver/
+*.jlink
+JLinkLog.txt
+gdb.txt
+
+# VS Code Cache & Local Machine Data
+.vscode/*.browse.*
+.vscode/*.VC.db
+.vscode/ipch/
+.vscode/.cmakepresets.json
+
+# OS and General Editor Artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+*.bak

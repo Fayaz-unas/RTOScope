@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RTOScope - Real-Time OS Scheduler Visualizer</title>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --border-color: #475569;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-cyan: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-amber: #fbbf24;
+      --accent-red: #f87171;
+      --accent-purple: #c084fc;
+      --idle-color: #475569;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-secondary);
+      padding: 14px 24px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 18px;
+      color: white;
+    }
+
+    .brand h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .brand p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    button {
+      background: var(--bg-tertiary);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      background: #475569;
+    }
+
+    button.btn-primary {
+      background: #0284c7;
+      border-color: #38bdf8;
+    }
+
+    button.btn-primary:hover {
+      background: #0369a1;
+    }
+
+    button.btn-danger {
+      background: #dc2626;
+      border-color: #f87171;
+    }
+
+    button.btn-danger:hover {
+      background: #b91c1c;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+
+    .status-dot.connected {
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    /* Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 16px;
+      flex: 1;
+    }
+
+    /* Timeline Panel */
+    .panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+    }
+
+    .canvas-container {
+      position: relative;
+      flex: 1;
+      min-height: 380px;
+      background: #090d16;
+      border-radius: 6px;
+      border: 1px solid #1e293b;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Metrics & Stats Panel */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .metric-card {
+      background: #090d16;
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid #1e293b;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .metric-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .cpu-bar-bg {
+      height: 10px;
+      background: #1e293b;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .cpu-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      transition: width 0.3s ease;
+    }
+
+    /* Task Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-running {
+      background: rgba(74, 222, 128, 0.2);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green);
+      animation: pulse 1.5s infinite;
+    }
+
+    .badge-ready {
+      background: rgba(251, 191, 36, 0.2);
+      color: var(--accent-amber);
+      border: 1px solid var(--accent-amber);
+    }
+
+    .badge-idle {
+      background: rgba(148, 163, 184, 0.2);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Terminal Console */
+    .console-panel {
+      background: #090d16;
+      border-radius: 6px;
+      border: 1px solid #1e293b;
+      padding: 10px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.75rem;
+      height: 140px;
+      overflow-y: auto;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+    }
+
+    .console-line {
+      line-height: 1.4;
+      word-break: break-all;
+    }
+
+    .console-line.preemption {
+      color: #f87171;
+      font-weight: bold;
+    }
+
+    .console-line.telemetry {
+      color: #38bdf8;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      margin-right: 12px;
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">Ω</div>
+      <div>
+        <h1>RTOScope</h1>
+        <p>Real-Time OS Scheduler Visualizer & Telemetry Analyzer (FRDM-MCXN236)</p>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="status-badge">
+        <div id="statusDot" class="status-dot"></div>
+        <span id="statusText">Disconnected</span>
+      </div>
+      <button id="connectBtn" class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+        Connect Board
+      </button>
+      <button id="pauseBtn">Pause Stream</button>
+      <button id="clearBtn">Clear Buffer</button>
+      <button id="exportBtn">Export JSON</button>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <div class="dashboard-grid">
+    
+    <!-- Timeline / Gantt Chart -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Task Execution Timeline (Gantt Chart)</span>
+        <div id="legendContainer">
+          <!-- Dynamically populated legend -->
+        </div>
+      </div>
+      
+      <div class="canvas-container">
+        <canvas id="timelineCanvas"></canvas>
+      </div>
+
+      <!-- Telemetry Console -->
+      <div class="panel-header" style="margin-top: 4px;">
+        <span class="panel-title" style="font-size: 0.9rem;">Diagnostic & Telemetry Log</span>
+        <span id="eventCounter" style="font-size: 0.75rem; color: var(--text-muted);">0 events captured</span>
+      </div>
+      <div id="consoleLog" class="console-panel"></div>
+    </div>
+
+    <!-- Sidebar / Metrics -->
+    <div class="sidebar">
+      
+      <!-- CPU Load Metric -->
+      <div class="metric-card">
+        <span class="metric-title">Active CPU Utilization</span>
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <span id="cpuUsageText" class="metric-value">0.0%</span>
+          <span id="uptimeText" style="font-size: 0.8rem; color: var(--text-muted);">Uptime: 0s</span>
+        </div>
+        <div class="cpu-bar-bg">
+          <div id="cpuUsageBar" class="cpu-bar-fill"></div>
+        </div>
+      </div>
+
+      <!-- Tasks State Table -->
+      <div class="panel" style="flex: 1;">
+        <div class="panel-header">
+          <span class="panel-title">Active Tasks</span>
+          <span id="taskCountText" style="font-size: 0.75rem; color: var(--text-muted);">0 Tasks</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Prio</th>
+              <th>State</th>
+              <th>CPU %</th>
+            </tr>
+          </thead>
+          <tbody id="taskTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Task color palette
+    const TASK_COLORS = {
+      0: '#475569', // IDLE (gray)
+      1: '#38bdf8', // LED Blink (cyan)
+      2: '#f87171', // Button Press (red / high prio)
+      3: '#34d399', // Sensor Read (emerald green)
+      4: '#fbbf24', // UART Print (amber)
+      5: '#c084fc', // Scheduler Monitor (purple)
+    };
+
+    // State Variables
+    let port = null;
+    let reader = null;
+    let keepReading = false;
+    let isPaused = false;
+
+    const tasks = new Map(); // id -> { id, name, priority, state, totalRuntimeUs, lastInTimeUs }
+    const traceEvents = [];  // { type, taskId, timestampUs }
+    const MAX_EVENTS = 15000;
+    const WINDOW_SPAN_US = 2000000; // 2 seconds window visible on Gantt
+    let latestTimestampUs = 0;
+    let totalCpuEvents = 0;
+
+    // UI Elements
+    const connectBtn = document.getElementById('connectBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const cpuUsageText = document.getElementById('cpuUsageText');
+    const cpuUsageBar = document.getElementById('cpuUsageBar');
+    const uptimeText = document.getElementById('uptimeText');
+    const taskCountText = document.getElementById('taskCountText');
+    const taskTableBody = document.getElementById('taskTableBody');
+    const consoleLog = document.getElementById('consoleLog');
+    const legendContainer = document.getElementById('legendContainer');
+    const eventCounter = document.getElementById('eventCounter');
+
+    const canvas = document.getElementById('timelineCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Pre-populate default tasks
+    function initDefaultTasks() {
+      const defs = [
+        { id: 0, name: 'IDLE', priority: 0 },
+        { id: 1, name: 'LED_Blink', priority: 1 },
+        { id: 2, name: 'Button_Press', priority: 4 },
+        { id: 3, name: 'Sensor_Read', priority: 2 },
+        { id: 4, name: 'UART_Print', priority: 2 },
+        { id: 5, name: 'Sched_Monitor', priority: 3 }
+      ];
+      defs.forEach(d => registerTask(d.id, d.name, d.priority));
+    }
+
+    function registerTask(id, name, priority) {
+      if (!tasks.has(id)) {
+        tasks.set(id, {
+          id: id,
+          name: name,
+          priority: priority,
+          state: (id === 0) ? 'RUNNING' : 'BLOCKED',
+          color: TASK_COLORS[id] || '#a3e635',
+          totalRuntimeUs: 0,
+          lastInTimeUs: null,
+          cpuPercent: 0
+        });
+        updateTaskTable();
+        updateLegend();
+      }
+    }
+
+    function updateLegend() {
+      legendContainer.innerHTML = '';
+      tasks.forEach(task => {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.innerHTML = `
+          <div class="legend-color" style="background: ${task.color}"></div>
+          <span>${task.name}</span>
+        `;
+        legendContainer.appendChild(item);
+      });
+    }
+
+    function updateTaskTable() {
+      taskCountText.textContent = `${tasks.size} Tasks`;
+      taskTableBody.innerHTML = '';
+      
+      const sorted = Array.from(tasks.values()).sort((a, b) => b.priority - a.priority);
+      sorted.forEach(t => {
+        const row = document.createElement('tr');
+        const badgeClass = t.state === 'RUNNING' ? 'badge-running' : (t.id === 0 ? 'badge-idle' : 'badge-ready');
+        row.innerHTML = `
+          <td>
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${t.color};margin-right:6px;"></span>
+            <strong>${t.name}</strong>
+          </td>
+          <td>P${t.priority}</td>
+          <td><span class="badge ${badgeClass}">${t.state}</span></td>
+          <td><strong>${t.cpuPercent.toFixed(1)}%</strong></td>
+        `;
+        taskTableBody.appendChild(row);
+      });
+    }
+
+    function logConsole(msg, type = 'normal') {
+      const line = document.createElement('div');
+      line.className = 'console-line ' + type;
+      line.textContent = `[${(latestTimestampUs / 1000000).toFixed(2)}s] ` + msg;
+      consoleLog.prepend(line);
+      while (consoleLog.children.length > 100) {
+        consoleLog.removeChild(consoleLog.lastChild);
+      }
+    }
+
+    // Packet Parser
+    function processLine(rawLine) {
+      rawLine = rawLine.trim();
+      if (!rawLine) return;
+
+      // In case multiple packets got merged without a newline, split by '#'
+      const chunks = rawLine.split('#');
+      for (const chunk of chunks) {
+        if (!chunk.trim()) continue;
+        const line = '#' + chunk.trim();
+
+        if (line.startsWith('#T,')) {
+          // #T,<id>,<name>,<priority>
+          const parts = line.split(',');
+          if (parts.length >= 4) {
+            registerTask(parseInt(parts[1], 10), parts[2], parseInt(parts[3], 10));
+          }
+        } else if (line.startsWith('#E,')) {
+          // #E,<I|O>,<task_id>,<timestamp_us>
+          const parts = line.split(',');
+          if (parts.length >= 4) {
+            const type = parts[1];
+            const taskId = parseInt(parts[2], 10);
+            const timestampUs = parseInt(parts[3], 10);
+
+            if (!isNaN(timestampUs) && !isNaN(taskId) && !isPaused) {
+              handleTraceEvent(type, taskId, timestampUs);
+            }
+          }
+        } else if (line.startsWith('#M,')) {
+          // Telemetry message
+          const msg = line.substring(3);
+          const isPreempt = msg.includes('PREEMPTION') || msg.includes('Button');
+          logConsole(msg, isPreempt ? 'preemption' : 'telemetry');
+        }
+      }
+    }
+
+    function handleTraceEvent(type, taskId, timestampUs) {
+      if (isNaN(timestampUs)) return;
+
+      if (latestTimestampUs === 0) {
+        latestTimestampUs = timestampUs;
+      } else if (timestampUs > latestTimestampUs) {
+        latestTimestampUs = timestampUs;
+      } else if (latestTimestampUs - timestampUs > 50000000) {
+        // Counter wrap or reset
+        latestTimestampUs = timestampUs;
+      }
+
+      totalCpuEvents++;
+      if (totalCpuEvents % 5 === 0) {
+        eventCounter.textContent = `${traceEvents.length} events captured`;
+      }
+
+      traceEvents.push({ type, taskId, timestampUs });
+      if (traceEvents.length > MAX_EVENTS) {
+        traceEvents.shift();
+      }
+
+      // Update task state & runtime statistics
+      const task = tasks.get(taskId);
+      if (task) {
+        if (type === 'I') {
+          // Task switched IN
+          task.state = 'RUNNING';
+          task.lastInTimeUs = timestampUs;
+
+          // Set other running tasks to READY
+          tasks.forEach((t, id) => {
+            if (id !== taskId && t.state === 'RUNNING') {
+              t.state = (id === 0) ? 'IDLE' : 'READY';
+            }
+          });
+        } else if (type === 'O') {
+          // Task switched OUT
+          task.state = (taskId === 0) ? 'IDLE' : 'BLOCKED';
+          if (task.lastInTimeUs !== null && timestampUs >= task.lastInTimeUs) {
+            task.totalRuntimeUs += (timestampUs - task.lastInTimeUs);
+          }
+          task.lastInTimeUs = null;
+        }
+      }
+    }
+
+    // Periodic CPU Usage recalculation (every 500ms)
+    setInterval(() => {
+      if (traceEvents.length < 2) return;
+
+      const windowUs = 1000000; // Last 1 second
+      const startTime = latestTimestampUs > windowUs ? (latestTimestampUs - windowUs) : 0;
+      let idleTimeUs = 0;
+      let activeTimeUs = 0;
+
+      // Calculate execution intervals in current window
+      const taskWindowTimes = new Map();
+      tasks.forEach((_, id) => taskWindowTimes.set(id, 0));
+
+      for (let i = 0; i < traceEvents.length - 1; i++) {
+        const e1 = traceEvents[i];
+        const e2 = traceEvents[i + 1];
+        if (e1.type === 'I' && e2.timestampUs >= startTime) {
+          const start = Math.max(e1.timestampUs, startTime);
+          let end = Math.min(e2.timestampUs, latestTimestampUs);
+          // Cap non-idle task interval to 50ms in case a switch-out packet was dropped
+          if (e1.taskId !== 0 && (end - start) > 50000) {
+            end = start + 50000;
+          }
+          if (end > start) {
+            const dur = end - start;
+            taskWindowTimes.set(e1.taskId, (taskWindowTimes.get(e1.taskId) || 0) + dur);
+            if (e1.taskId === 0) {
+              idleTimeUs += dur;
+            } else {
+              activeTimeUs += dur;
+            }
+          }
+        }
+      }
+
+      const totalMeasured = idleTimeUs + activeTimeUs;
+      let cpuPercent = 0;
+      if (totalMeasured > 0) {
+        cpuPercent = Math.min(100, Math.max(0, (activeTimeUs / totalMeasured) * 100));
+        tasks.forEach((t, id) => {
+          t.cpuPercent = ((taskWindowTimes.get(id) || 0) / totalMeasured) * 100;
+        });
+      }
+
+      cpuUsageText.textContent = cpuPercent.toFixed(1) + '%';
+      cpuUsageBar.style.width = cpuPercent + '%';
+      uptimeText.textContent = `Uptime: ${(latestTimestampUs / 1000000).toFixed(1)}s`;
+
+      updateTaskTable();
+    }, 500);
+
+    // Canvas Gantt Rendering Loop
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function renderGantt() {
+      requestAnimationFrame(renderGantt);
+
+      const width = canvas.width / window.devicePixelRatio;
+      const height = canvas.height / window.devicePixelRatio;
+
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(0, 0, width, height);
+
+      if (tasks.size === 0) return;
+
+      const taskArray = Array.from(tasks.values()).sort((a, b) => b.priority - a.priority);
+      const rowHeight = (height - 40) / taskArray.length;
+      const labelWidth = 130;
+      const chartWidth = width - labelWidth - 20;
+
+      const timeEndUs = latestTimestampUs;
+      const timeStartUs = Math.max(0, timeEndUs - WINDOW_SPAN_US);
+
+      // Draw grid lines & time markers
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      const timeStepUs = 200000; // 200ms grid divisions
+      const firstTick = Math.ceil(timeStartUs / timeStepUs) * timeStepUs;
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '10px monospace';
+
+      for (let t = firstTick; t <= timeEndUs; t += timeStepUs) {
+        const x = labelWidth + ((t - timeStartUs) / WINDOW_SPAN_US) * chartWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height - 25);
+        ctx.stroke();
+
+        const secStr = (t / 1000000).toFixed(1) + 's';
+        ctx.fillText(secStr, x - 12, height - 10);
+      }
+
+      // Draw Rows & Task Execution Blocks
+      taskArray.forEach((task, idx) => {
+        const y = idx * rowHeight + 10;
+
+        // Row background alternating
+        ctx.fillStyle = (idx % 2 === 0) ? 'rgba(30, 41, 59, 0.4)' : 'rgba(15, 23, 42, 0.4)';
+        ctx.fillRect(labelWidth, y, chartWidth, rowHeight - 6);
+
+        // Task Label
+        ctx.fillStyle = task.color;
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillText(task.name, 12, y + rowHeight / 2 - 2);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px sans-serif';
+        ctx.fillText(`Prio ${task.priority}`, 12, y + rowHeight / 2 + 10);
+      });
+
+      // Draw active execution rectangles
+      for (let i = 0; i < traceEvents.length - 1; i++) {
+        const e1 = traceEvents[i];
+        const e2 = traceEvents[i + 1];
+
+        if (e1.type === 'I' && e2.timestampUs >= timeStartUs && e1.timestampUs <= timeEndUs) {
+          const task = tasks.get(e1.taskId);
+          if (!task) continue;
+
+          const rowIdx = taskArray.findIndex(t => t.id === e1.taskId);
+          if (rowIdx === -1) continue;
+
+          const y = rowIdx * rowHeight + 12;
+          const blockHeight = rowHeight - 10;
+
+          const startUs = Math.max(e1.timestampUs, timeStartUs);
+          let endUs = Math.min(e2.timestampUs, timeEndUs);
+          // Cap non-idle tasks to 50ms (50,000 us) to prevent dropped packets from drawing a solid wall
+          if (e1.taskId !== 0 && (endUs - startUs) > 50000) {
+            endUs = startUs + 50000;
+          }
+          const x1 = labelWidth + ((startUs - timeStartUs) / WINDOW_SPAN_US) * chartWidth;
+          const x2 = labelWidth + ((endUs - timeStartUs) / WINDOW_SPAN_US) * chartWidth;
+          const w = Math.max(2, x2 - x1);
+
+          ctx.fillStyle = task.color;
+          ctx.beginPath();
+          ctx.roundRect(x1, y, w, blockHeight, 3);
+          ctx.fill();
+        }
+      }
+    }
+
+    // Web Serial API Communication
+    async function connectSerial() {
+      if (!('serial' in navigator)) {
+        alert('Web Serial API is not supported in this browser. Please use Chrome, Edge, or Opera.');
+        return;
+      }
+
+      try {
+        port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 115200 });
+
+        keepReading = true;
+        statusDot.className = 'status-dot connected';
+        statusText.textContent = 'Connected (115200)';
+        connectBtn.textContent = 'Disconnect';
+        connectBtn.className = 'btn-danger';
+
+        readSerialLoop();
+      } catch (err) {
+        console.error('Serial connection error:', err);
+      }
+    }
+
+    async function disconnectSerial() {
+      keepReading = false;
+      if (reader) {
+        await reader.cancel();
+      }
+      if (port) {
+        await port.close();
+        port = null;
+      }
+      statusDot.className = 'status-dot';
+      statusText.textContent = 'Disconnected';
+      connectBtn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+        Connect Board
+      `;
+      connectBtn.className = 'btn-primary';
+    }
+
+    async function readSerialLoop() {
+      const textDecoder = new TextDecoderStream();
+      const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+      reader = textDecoder.readable.getReader();
+
+      let buffer = '';
+
+      try {
+        while (keepReading) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          if (value) {
+            buffer += value;
+            const lines = buffer.split('\n');
+            buffer = lines.pop(); // Keep incomplete line
+
+            for (const line of lines) {
+              processLine(line);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Read loop error:', err);
+      } finally {
+        reader.releaseLock();
+      }
+    }
+
+    connectBtn.addEventListener('click', () => {
+      if (port) {
+        disconnectSerial();
+      } else {
+        connectSerial();
+      }
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      isPaused = !isPaused;
+      pauseBtn.textContent = isPaused ? 'Resume Stream' : 'Pause Stream';
+      pauseBtn.style.background = isPaused ? '#dc2626' : '';
+    });
+
+    clearBtn.addEventListener('click', () => {
+      traceEvents.length = 0;
+      eventCounter.textContent = '0 events captured';
+    });
+
+    exportBtn.addEventListener('click', () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+        exportTime: new Date().toISOString(),
+        tasks: Array.from(tasks.values()),
+        events: traceEvents
+      }, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `RTOScope_Trace_${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    });
+
+    // Start
+    initDefaultTasks();
+    renderGantt();
+  </script>
+</body>
+</html>
