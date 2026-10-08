@@ -7,8 +7,8 @@
   "projectType": "sdk-v2-freestanding",
   "projectName": "RTOScope",
   "sdk": {
-    "version": "26.6.0",
-    "path": "c:\\nxp\\sdks\\SDK_26_06_00_FRDM-MCXN236",
+    "version": "26.9.0",
+    "path": "c:\\NXP\\sdks\\SDK_26_09_00_FRDM-MCXN236",
     "boardId": "frdmmcxn236",
     "deviceId": "MCXN236",
     "coreId": "cm33_core0"
