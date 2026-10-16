@@ -6,18 +6,18 @@
   <title>RTOScope - Real-Time OS Scheduler Visualizer</title>
   <style>
     :root {
-      --bg-primary: #0f172a;
-      --bg-secondary: #1e293b;
-      --bg-tertiary: #334155;
-      --border-color: #475569;
+      --bg-primary: #0b0f19;
+      --bg-secondary: #131b2e;
+      --bg-tertiary: #1e293b;
+      --border-color: #334155;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --accent-cyan: #38bdf8;
-      --accent-green: #4ade80;
+      --accent-green: #10b981;
       --accent-amber: #fbbf24;
       --accent-red: #f87171;
       --accent-purple: #c084fc;
-      --idle-color: #475569;
+      --idle-color: #64748b;
     }
 
     * {
@@ -33,7 +33,7 @@
       padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       min-height: 100vh;
     }
 
@@ -43,9 +43,11 @@
       justify-content: space-between;
       align-items: center;
       background: var(--bg-secondary);
-      padding: 14px 24px;
+      padding: 12px 20px;
       border-radius: 10px;
       border: 1px solid var(--border-color);
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     .brand {
@@ -55,52 +57,58 @@
     }
 
     .brand-logo {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 8px;
       background: linear-gradient(135deg, #0284c7, #38bdf8);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
-      font-size: 18px;
+      font-weight: 800;
+      font-size: 20px;
       color: white;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
     }
 
     .brand h1 {
-      font-size: 1.3rem;
+      font-size: 1.25rem;
       font-weight: 700;
       letter-spacing: 0.5px;
     }
 
     .brand p {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
     }
 
     .controls {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    button {
+    select, button {
       background: var(--bg-tertiary);
       color: var(--text-main);
       border: 1px solid var(--border-color);
-      padding: 8px 16px;
+      padding: 7px 14px;
       border-radius: 6px;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       transition: all 0.2s ease;
     }
 
+    select {
+      outline: none;
+    }
+
     button:hover {
-      background: #475569;
+      background: #334155;
     }
 
     button.btn-primary {
@@ -125,10 +133,10 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.85rem;
-      padding: 6px 12px;
+      font-size: 0.8rem;
+      padding: 5px 12px;
       border-radius: 20px;
-      background: #0f172a;
+      background: #090d16;
       border: 1px solid var(--border-color);
     }
 
@@ -144,11 +152,26 @@
       box-shadow: 0 0 8px #22c55e;
     }
 
+    /* Warning Banner for Dropped Events */
+    #dropWarningBanner {
+      display: none;
+      background: #7f1d1d;
+      color: #fecaca;
+      border: 1px solid #f87171;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+    }
+
     /* Grid Layout */
     .dashboard-grid {
       display: grid;
       grid-template-columns: 1fr 340px;
-      gap: 16px;
+      gap: 14px;
       flex: 1;
     }
 
@@ -157,20 +180,22 @@
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
       border-radius: 10px;
-      padding: 16px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .panel-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .panel-title {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 600;
       color: var(--accent-cyan);
     }
@@ -178,8 +203,8 @@
     .canvas-container {
       position: relative;
       flex: 1;
-      min-height: 380px;
-      background: #090d16;
+      min-height: 460px;
+      background: #060911;
       border-radius: 6px;
       border: 1px solid #1e293b;
       overflow: hidden;
@@ -195,36 +220,48 @@
     .sidebar {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
+    }
+
+    .metrics-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
     }
 
     .metric-card {
       background: #090d16;
-      padding: 14px;
+      padding: 12px;
       border-radius: 8px;
       border: 1px solid #1e293b;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
     }
 
     .metric-title {
-      font-size: 0.8rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .metric-value {
-      font-size: 1.8rem;
+      font-size: 1.35rem;
       font-weight: 700;
       color: var(--text-main);
+      font-family: 'Consolas', monospace;
+    }
+
+    .metric-sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
     }
 
     .cpu-bar-bg {
-      height: 10px;
+      height: 8px;
       background: #1e293b;
-      border-radius: 5px;
+      border-radius: 4px;
       overflow: hidden;
       margin-top: 4px;
     }
@@ -233,70 +270,81 @@
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #38bdf8, #818cf8);
-      transition: width 0.3s ease;
+      transition: width 0.25s ease;
     }
 
     /* Task Table */
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.85rem;
+      font-size: 0.78rem;
     }
 
     th, td {
-      padding: 8px 10px;
+      padding: 6px 6px;
       text-align: left;
-      border-bottom: 1px solid #334155;
+      border-bottom: 1px solid #1e293b;
     }
 
     th {
       color: var(--text-muted);
       font-weight: 600;
-      font-size: 0.75rem;
+      font-size: 0.68rem;
       text-transform: uppercase;
     }
 
     .badge {
       display: inline-block;
-      padding: 2px 8px;
+      padding: 2px 6px;
       border-radius: 4px;
-      font-size: 0.75rem;
+      font-size: 0.68rem;
       font-weight: 600;
+      transition: all 0.2s ease;
     }
 
     .badge-running {
       background: rgba(74, 222, 128, 0.2);
-      color: var(--accent-green);
-      border: 1px solid var(--accent-green);
-      animation: pulse 1.5s infinite;
+      color: #4ade80;
+      border: 1px solid #4ade80;
     }
 
     .badge-ready {
       background: rgba(251, 191, 36, 0.2);
-      color: var(--accent-amber);
-      border: 1px solid var(--accent-amber);
+      color: #fbbf24;
+      border: 1px solid #fbbf24;
+    }
+
+    .badge-blocked {
+      background: rgba(148, 163, 184, 0.15);
+      color: #94a3b8;
+      border: 1px solid #475569;
     }
 
     .badge-idle {
-      background: rgba(148, 163, 184, 0.2);
+      background: rgba(100, 116, 139, 0.2);
       color: var(--text-muted);
       border: 1px solid var(--border-color);
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+    /* Active Pulse Indicators */
+    .badge-pulse {
+      animation: flashGlow 0.4s infinite alternate;
+    }
+
+    @keyframes flashGlow {
+      from { transform: scale(0.98); opacity: 0.8; }
+      to   { transform: scale(1.05); opacity: 1; }
     }
 
     /* Terminal Console */
     .console-panel {
-      background: #090d16;
+      background: #060911;
       border-radius: 6px;
       border: 1px solid #1e293b;
-      padding: 10px;
+      padding: 8px;
       font-family: 'Consolas', 'Courier New', monospace;
-      font-size: 0.75rem;
-      height: 140px;
+      font-size: 0.72rem;
+      height: 120px;
       overflow-y: auto;
       color: #94a3b8;
       display: flex;
@@ -304,12 +352,17 @@
     }
 
     .console-line {
-      line-height: 1.4;
+      line-height: 1.35;
       word-break: break-all;
     }
 
     .console-line.preemption {
       color: #f87171;
+      font-weight: bold;
+    }
+
+    .console-line.rfid {
+      color: #10b981;
       font-weight: bold;
     }
 
@@ -320,14 +373,14 @@
     .legend-item {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      margin-right: 12px;
+      gap: 5px;
+      font-size: 0.72rem;
+      margin-right: 10px;
     }
 
     .legend-color {
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       border-radius: 3px;
     }
   </style>
@@ -348,17 +401,32 @@
         <div id="statusDot" class="status-dot"></div>
         <span id="statusText">Disconnected</span>
       </div>
+      <select id="baudSelect">
+        <option value="115200" selected>115200 Baud</option>
+        <option value="460800">460800 Baud</option>
+        <option value="921600">921600 Baud</option>
+      </select>
       <button id="connectBtn" class="btn-primary">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M5 12h14M12 5l7 7-7 7"/>
         </svg>
         Connect Board
       </button>
-      <button id="pauseBtn">Pause Stream</button>
-      <button id="clearBtn">Clear Buffer</button>
-      <button id="exportBtn">Export JSON</button>
+      <select id="zoomSelect">
+        <option value="1000000">Window: 1.0s</option>
+        <option value="2000000" selected>Window: 2.0s</option>
+        <option value="5000000">Window: 5.0s</option>
+        <option value="10000000">Window: 10.0s</option>
+      </select>
+      <button id="pauseBtn">Pause</button>
+      <button id="clearBtn">Clear</button>
     </div>
   </header>
+
+  <!-- Dropped Events Warning Banner (Shown only when drops > 0) -->
+  <div id="dropWarningBanner" style="display: none;">
+    <span>⚠️ <strong>BUFFER OVERFLOW WARNING:</strong> <span id="dropWarningCount">0</span> dropped trace events detected! Ensure baud rate is set to 460800+.</span>
+  </div>
 
   <!-- Main Grid -->
   <div class="dashboard-grid">
@@ -366,10 +434,8 @@
     <!-- Timeline / Gantt Chart -->
     <div class="panel">
       <div class="panel-header">
-        <span class="panel-title">Task Execution Timeline (Gantt Chart)</span>
-        <div id="legendContainer">
-          <!-- Dynamically populated legend -->
-        </div>
+        <span class="panel-title">Real-Time Execution Timeline & Hardware Signals</span>
+        <div id="legendContainer"></div>
       </div>
       
       <div class="canvas-container">
@@ -377,9 +443,12 @@
       </div>
 
       <!-- Telemetry Console -->
-      <div class="panel-header" style="margin-top: 4px;">
-        <span class="panel-title" style="font-size: 0.9rem;">Diagnostic & Telemetry Log</span>
-        <span id="eventCounter" style="font-size: 0.75rem; color: var(--text-muted);">0 events captured</span>
+      <div class="panel-header" style="margin-top: 2px;">
+        <span class="panel-title" style="font-size: 0.85rem;">Trace Event Stream & Hardware Interrupts</span>
+        <div style="display:flex; gap:12px; font-size:0.75rem; color:var(--text-muted);">
+          <span id="dropCounter">Drops: 0</span>
+          <span id="eventCounter">0 events</span>
+        </div>
       </div>
       <div id="consoleLog" class="console-panel"></div>
     </div>
@@ -392,31 +461,57 @@
         <span class="metric-title">Active CPU Utilization</span>
         <div style="display: flex; justify-content: space-between; align-items: baseline;">
           <span id="cpuUsageText" class="metric-value">0.0%</span>
-          <span id="uptimeText" style="font-size: 0.8rem; color: var(--text-muted);">Uptime: 0s</span>
+          <span id="uptimeText" style="font-size: 0.75rem; color: var(--text-muted);">Uptime: 0.0s</span>
         </div>
         <div class="cpu-bar-bg">
           <div id="cpuUsageBar" class="cpu-bar-fill"></div>
         </div>
       </div>
 
+      <!-- Dual Hardware Timing Cards -->
+      <div class="metrics-row">
+        <!-- Button Latency -->
+        <div class="metric-card">
+          <span class="metric-title">Button Latency</span>
+          <span id="latencyText" class="metric-value" style="color: var(--accent-red);">--</span>
+          <span class="metric-sub">IRQ → Red LED On</span>
+        </div>
+
+        <!-- Blue Blink Period -->
+        <div class="metric-card">
+          <span class="metric-title">Blink Period</span>
+          <span id="blinkPeriodText" class="metric-value" style="color: var(--accent-cyan);">--</span>
+          <span class="metric-sub">Target: 500 ms</span>
+        </div>
+      </div>
+
+      <!-- RFID Sensor Telemetry Card -->
+      <div class="metric-card">
+        <span class="metric-title">RFID Tag Scanner</span>
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <span id="rfidTagText" class="metric-value" style="color: var(--accent-green);">--</span>
+          <span id="rfidCountText" style="font-size: 0.75rem; color: var(--text-muted);">0 tags read</span>
+        </div>
+        <span id="rfidTimeText" class="metric-sub">Waiting for tag tap...</span>
+      </div>
+
       <!-- Tasks State Table -->
       <div class="panel" style="flex: 1;">
         <div class="panel-header">
-          <span class="panel-title">Active Tasks</span>
-          <span id="taskCountText" style="font-size: 0.75rem; color: var(--text-muted);">0 Tasks</span>
+          <span class="panel-title">Registered Tasks</span>
+          <span id="taskCountText" style="font-size: 0.72rem; color: var(--text-muted);">0 Tasks</span>
         </div>
         <table>
           <thead>
             <tr>
               <th>Task</th>
               <th>Prio</th>
-              <th>State</th>
+              <th>Live State</th>
+              <th>Runs</th>
               <th>CPU %</th>
             </tr>
           </thead>
-          <tbody id="taskTableBody">
-            <!-- Dynamically populated -->
-          </tbody>
+          <tbody id="taskTableBody"></tbody>
         </table>
       </div>
 
@@ -424,57 +519,81 @@
   </div>
 
   <script>
-    // Task color palette
+    // Task color mapping matching exact task specification
     const TASK_COLORS = {
-      0: '#475569', // IDLE (gray)
-      1: '#38bdf8', // LED Blink (cyan)
-      2: '#f87171', // Button Press (red / high prio)
-      3: '#34d399', // Sensor Read (emerald green)
-      4: '#fbbf24', // UART Print (amber)
-      5: '#c084fc', // Scheduler Monitor (purple)
+      0: '#64748b', // IDLE (gray)
+      1: '#38bdf8', // LED_Blink (cyan)
+      2: '#10b981', // RFID_Read (emerald green)
+      3: '#f87171', // Button_Press (red)
+      4: '#c084fc', // Sched_Monitor (purple)
+      5: '#fbbf24', // Background (amber)
     };
 
-    // State Variables
+    // State
     let port = null;
     let reader = null;
     let keepReading = false;
     let isPaused = false;
 
-    const tasks = new Map(); // id -> { id, name, priority, state, totalRuntimeUs, lastInTimeUs }
-    const traceEvents = [];  // { type, taskId, timestampUs }
+    const tasks = new Map();
+    const traceEvents = [];       // { type: 'I'|'O', taskId, timestampUs }
+    const blueLedEvents = [];     // { state: 0|1, timestampUs }
+    const redLedEvents = [];      // { state: 0|1, timestampUs }
+    const buttonIrqEvents = [];   // { timestampUs }
+    const rfidScanEvents = [];    // { hash: '0xXX', timestampUs }
+
     const MAX_EVENTS = 15000;
-    const WINDOW_SPAN_US = 2000000; // 2 seconds window visible on Gantt
+    let WINDOW_SPAN_US = 2000000; // 2.0 seconds visible
     let latestTimestampUs = 0;
     let totalCpuEvents = 0;
+    let droppedEventCount = 0;
 
-    // UI Elements
+    // Measurement trackers
+    let lastButtonIrqUs = 0;
+    let lastBlueOnUs = 0;
+    let rfidTotalScans = 0;
+
+    // UI references
     const connectBtn = document.getElementById('connectBtn');
+    const baudSelect = document.getElementById('baudSelect');
+    const zoomSelect = document.getElementById('zoomSelect');
     const pauseBtn = document.getElementById('pauseBtn');
     const clearBtn = document.getElementById('clearBtn');
-    const exportBtn = document.getElementById('exportBtn');
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
+    const dropWarningBanner = document.getElementById('dropWarningBanner');
+    const dropWarningCount = document.getElementById('dropWarningCount');
     const cpuUsageText = document.getElementById('cpuUsageText');
     const cpuUsageBar = document.getElementById('cpuUsageBar');
     const uptimeText = document.getElementById('uptimeText');
+    const latencyText = document.getElementById('latencyText');
+    const blinkPeriodText = document.getElementById('blinkPeriodText');
+    const rfidTagText = document.getElementById('rfidTagText');
+    const rfidCountText = document.getElementById('rfidCountText');
+    const rfidTimeText = document.getElementById('rfidTimeText');
     const taskCountText = document.getElementById('taskCountText');
     const taskTableBody = document.getElementById('taskTableBody');
     const consoleLog = document.getElementById('consoleLog');
     const legendContainer = document.getElementById('legendContainer');
     const eventCounter = document.getElementById('eventCounter');
+    const dropCounter = document.getElementById('dropCounter');
 
     const canvas = document.getElementById('timelineCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Pre-populate default tasks
+    zoomSelect.addEventListener('change', () => {
+      WINDOW_SPAN_US = parseInt(zoomSelect.value, 10);
+    });
+
+    // Default tasks configuration matching exact firmware definition
     function initDefaultTasks() {
       const defs = [
         { id: 0, name: 'IDLE', priority: 0 },
         { id: 1, name: 'LED_Blink', priority: 1 },
-        { id: 2, name: 'Button_Press', priority: 4 },
-        { id: 3, name: 'Sensor_Read', priority: 2 },
-        { id: 4, name: 'UART_Print', priority: 2 },
-        { id: 5, name: 'Sched_Monitor', priority: 3 }
+        { id: 2, name: 'RFID_Read', priority: 3 },
+        { id: 3, name: 'Button_Press', priority: 4 },
+        { id: 4, name: 'Sched_Monitor', priority: 5 },
+        { id: 5, name: 'Background', priority: 1 }
       ];
       defs.forEach(d => registerTask(d.id, d.name, d.priority));
     }
@@ -486,19 +605,27 @@
           name: name,
           priority: priority,
           state: (id === 0) ? 'RUNNING' : 'BLOCKED',
-          color: TASK_COLORS[id] || '#a3e635',
+          color: TASK_COLORS[id] || '#4ade80',
           totalRuntimeUs: 0,
           lastInTimeUs: null,
+          runCount: 0,
+          recentlyActiveUntil: 0,
           cpuPercent: 0
         });
         updateTaskTable();
         updateLegend();
+      } else {
+        // Update priority or name if changed
+        const t = tasks.get(id);
+        t.name = name;
+        t.priority = priority;
       }
     }
 
     function updateLegend() {
       legendContainer.innerHTML = '';
-      tasks.forEach(task => {
+      const sorted = Array.from(tasks.values()).sort((a, b) => b.priority - a.priority);
+      sorted.forEach(task => {
         const item = document.createElement('div');
         item.className = 'legend-item';
         item.innerHTML = `
@@ -507,45 +634,85 @@
         `;
         legendContainer.appendChild(item);
       });
+      // Add LED signal legend items
+      const blueItem = document.createElement('div');
+      blueItem.className = 'legend-item';
+      blueItem.innerHTML = `<div class="legend-color" style="background:#38bdf8;"></div><span>Blue LED</span>`;
+      legendContainer.appendChild(blueItem);
+
+      const redItem = document.createElement('div');
+      redItem.className = 'legend-item';
+      redItem.innerHTML = `<div class="legend-color" style="background:#f87171;"></div><span>Red LED</span>`;
+      legendContainer.appendChild(redItem);
     }
 
     function updateTaskTable() {
       taskCountText.textContent = `${tasks.size} Tasks`;
       taskTableBody.innerHTML = '';
       
+      const nowMs = Date.now();
       const sorted = Array.from(tasks.values()).sort((a, b) => b.priority - a.priority);
       sorted.forEach(t => {
         const row = document.createElement('tr');
-        const badgeClass = t.state === 'RUNNING' ? 'badge-running' : (t.id === 0 ? 'badge-idle' : 'badge-ready');
+        const isRecentlyActive = (nowMs < t.recentlyActiveUntil);
+        
+        let displayState = t.state;
+        let badgeClass = 'badge-blocked';
+        if (t.state === 'RUNNING') {
+          badgeClass = 'badge-running';
+        } else if (t.state === 'READY') {
+          badgeClass = 'badge-ready';
+        } else if (t.state === 'BLOCKED') {
+          badgeClass = 'badge-blocked';
+        } else if (t.id === 0) {
+          badgeClass = 'badge-idle';
+        }
+
+        if (isRecentlyActive) {
+          badgeClass += ' badge-pulse';
+        }
+
+        let extraTag = '';
+        if (t.id === 1 && isRecentlyActive) {
+          extraTag = '<span style="color:#38bdf8;font-size:0.65rem;font-weight:bold;margin-left:5px;">💡 BLINK</span>';
+        } else if (t.id === 3 && isRecentlyActive) {
+          extraTag = '<span style="color:#f87171;font-size:0.65rem;font-weight:bold;margin-left:5px;">🔴 PRESS</span>';
+        } else if (t.id === 2 && isRecentlyActive) {
+          extraTag = '<span style="color:#10b981;font-size:0.65rem;font-weight:bold;margin-left:5px;">🟢 TAG</span>';
+        }
+
         row.innerHTML = `
           <td>
-            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${t.color};margin-right:6px;"></span>
-            <strong>${t.name}</strong>
+            <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${t.color};margin-right:5px;${isRecentlyActive ? 'box-shadow:0 0 8px ' + t.color + ';' : ''}"></span>
+            <strong>${t.name}</strong>${extraTag}
           </td>
           <td>P${t.priority}</td>
-          <td><span class="badge ${badgeClass}">${t.state}</span></td>
+          <td><span class="badge ${badgeClass}">${displayState}</span></td>
+          <td><strong style="font-family:monospace;color:${isRecentlyActive ? t.color : 'inherit'};">${t.runCount}</strong></td>
           <td><strong>${t.cpuPercent.toFixed(1)}%</strong></td>
         `;
         taskTableBody.appendChild(row);
       });
     }
 
+    // Refresh table at 10 FPS
+    setInterval(updateTaskTable, 100);
+
     function logConsole(msg, type = 'normal') {
       const line = document.createElement('div');
       line.className = 'console-line ' + type;
       line.textContent = `[${(latestTimestampUs / 1000000).toFixed(2)}s] ` + msg;
       consoleLog.prepend(line);
-      while (consoleLog.children.length > 100) {
+      while (consoleLog.children.length > 80) {
         consoleLog.removeChild(consoleLog.lastChild);
       }
     }
 
-    // Packet Parser
+    // Packet processing
     function processLine(rawLine) {
       rawLine = rawLine.trim();
       if (!rawLine) return;
 
-      // In case multiple packets got merged without a newline, split by '#'
       const chunks = rawLine.split('#');
       for (const chunk of chunks) {
         if (!chunk.trim()) continue;
@@ -558,64 +725,63 @@
             registerTask(parseInt(parts[1], 10), parts[2], parseInt(parts[3], 10));
           }
         } else if (line.startsWith('#E,')) {
-          // #E,<I|O>,<task_id>,<timestamp_us>
+          // Parse #E,<type>,...
           const parts = line.split(',');
           if (parts.length >= 4) {
             const type = parts[1];
-            const taskId = parseInt(parts[2], 10);
-            const timestampUs = parseInt(parts[3], 10);
-
-            if (!isNaN(timestampUs) && !isNaN(taskId) && !isPaused) {
-              handleTraceEvent(type, taskId, timestampUs);
+            if (type === 'S') {
+              // #E,S,<id>,<state>,<timestamp_us>
+              const taskId = parseInt(parts[2], 10);
+              const stateChar = parts[3];
+              const timestampUs = parseInt(parts[4], 10);
+              handleStateEvent(taskId, stateChar, timestampUs);
+            } else if (type === 'K') {
+              // #E,K,<uid_hash>,<timestamp_us>
+              const uidHash = parts[2];
+              const timestampUs = parseInt(parts[3], 10);
+              handleRfidEvent(uidHash, timestampUs);
+            } else {
+              // #E,<type>,<arg>,<timestamp_us>
+              const arg = parseInt(parts[2], 10);
+              const timestampUs = parseInt(parts[3], 10);
+              if (!isNaN(timestampUs) && !isNaN(arg) && !isPaused) {
+                handleTraceEvent(type, arg, timestampUs);
+              }
             }
           }
-        } else if (line.startsWith('#M,')) {
-          // Telemetry message
-          const msg = line.substring(3);
-          const isPreempt = msg.includes('PREEMPTION') || msg.includes('Button');
-          logConsole(msg, isPreempt ? 'preemption' : 'telemetry');
+        } else if (line.startsWith('#D,')) {
+          // #D,<dropped_count>
+          const parts = line.split(',');
+          if (parts.length >= 2) {
+            droppedEventCount = parseInt(parts[1], 10);
+            dropCounter.textContent = `Drops: ${droppedEventCount}`;
+            if (droppedEventCount > 0) {
+              dropCounter.style.color = '#f87171';
+              dropWarningBanner.style.display = 'flex';
+              dropWarningCount.textContent = droppedEventCount;
+            } else {
+              dropCounter.style.color = 'var(--text-muted)';
+              dropWarningBanner.style.display = 'none';
+            }
+          }
         }
       }
     }
 
-    function handleTraceEvent(type, taskId, timestampUs) {
+    function handleStateEvent(taskId, stateChar, timestampUs) {
       if (isNaN(timestampUs)) return;
+      updateLatestTimestamp(timestampUs);
 
-      if (latestTimestampUs === 0) {
-        latestTimestampUs = timestampUs;
-      } else if (timestampUs > latestTimestampUs) {
-        latestTimestampUs = timestampUs;
-      } else if (latestTimestampUs - timestampUs > 50000000) {
-        // Counter wrap or reset
-        latestTimestampUs = timestampUs;
-      }
-
-      totalCpuEvents++;
-      if (totalCpuEvents % 5 === 0) {
-        eventCounter.textContent = `${traceEvents.length} events captured`;
-      }
-
-      traceEvents.push({ type, taskId, timestampUs });
-      if (traceEvents.length > MAX_EVENTS) {
-        traceEvents.shift();
-      }
-
-      // Update task state & runtime statistics
       const task = tasks.get(taskId);
       if (task) {
-        if (type === 'I') {
-          // Task switched IN
+        if (stateChar === 'R') {
           task.state = 'RUNNING';
           task.lastInTimeUs = timestampUs;
-
-          // Set other running tasks to READY
-          tasks.forEach((t, id) => {
-            if (id !== taskId && t.state === 'RUNNING') {
-              t.state = (id === 0) ? 'IDLE' : 'READY';
-            }
-          });
-        } else if (type === 'O') {
-          // Task switched OUT
+          task.runCount = (task.runCount || 0) + 1;
+          task.recentlyActiveUntil = Date.now() + 350;
+        } else if (stateChar === 'D') {
+          task.state = 'READY';
+        } else if (stateChar === 'B') {
           task.state = (taskId === 0) ? 'IDLE' : 'BLOCKED';
           if (task.lastInTimeUs !== null && timestampUs >= task.lastInTimeUs) {
             task.totalRuntimeUs += (timestampUs - task.lastInTimeUs);
@@ -625,16 +791,131 @@
       }
     }
 
-    // Periodic CPU Usage recalculation (every 500ms)
+    function handleRfidEvent(uidHash, timestampUs) {
+      if (isNaN(timestampUs)) return;
+      updateLatestTimestamp(timestampUs);
+
+      const hexStr = '0x' + (uidHash.length === 1 ? '0' + uidHash : uidHash).toUpperCase();
+      rfidTotalScans++;
+      rfidTagText.textContent = hexStr;
+      rfidCountText.textContent = `${rfidTotalScans} tag${rfidTotalScans === 1 ? '' : 's'} read`;
+      rfidTimeText.textContent = `Scanned at ${(timestampUs / 1000000).toFixed(2)}s`;
+
+      rfidScanEvents.push({ hash: hexStr, timestampUs });
+      if (rfidScanEvents.length > 200) rfidScanEvents.shift();
+
+      const rfidTask = tasks.get(2);
+      if (rfidTask) {
+        rfidTask.recentlyActiveUntil = Date.now() + 600;
+        rfidTask.runCount = (rfidTask.runCount || 0) + 1;
+      }
+
+      logConsole(`[RFID] Tag Detected! Hash: ${hexStr} at ${timestampUs} µs`, 'rfid');
+    }
+
+    function updateLatestTimestamp(timestampUs) {
+      if (latestTimestampUs === 0 || timestampUs > latestTimestampUs) {
+        latestTimestampUs = timestampUs;
+      } else if (latestTimestampUs - timestampUs > 50000000) {
+        // Natural 32-bit timestamp wrap
+        latestTimestampUs = timestampUs;
+      }
+    }
+
+    function handleTraceEvent(type, arg, timestampUs) {
+      if (isNaN(timestampUs)) return;
+      updateLatestTimestamp(timestampUs);
+
+      totalCpuEvents++;
+      if (totalCpuEvents % 10 === 0) {
+        eventCounter.textContent = `${traceEvents.length} events`;
+      }
+
+      if (type === 'I' || type === 'O') {
+        const taskId = arg;
+        traceEvents.push({ type, taskId, timestampUs });
+        if (traceEvents.length > MAX_EVENTS) traceEvents.shift();
+
+        // Update task state
+        const task = tasks.get(taskId);
+        if (task) {
+          if (type === 'I') {
+            task.state = 'RUNNING';
+            task.lastInTimeUs = timestampUs;
+            task.runCount = (task.runCount || 0) + 1;
+            task.recentlyActiveUntil = Date.now() + 350;
+
+            tasks.forEach((t, id) => {
+              if (id !== taskId && t.state === 'RUNNING') {
+                t.state = (id === 0) ? 'IDLE' : 'READY';
+              }
+            });
+          } else {
+            task.state = (taskId === 0) ? 'IDLE' : 'BLOCKED';
+            if (task.lastInTimeUs !== null && timestampUs >= task.lastInTimeUs) {
+              task.totalRuntimeUs += (timestampUs - task.lastInTimeUs);
+            }
+            task.lastInTimeUs = null;
+          }
+        }
+      } else if (type === 'B') {
+        // Blue LED state: 0 or 1
+        blueLedEvents.push({ state: arg, timestampUs });
+        if (blueLedEvents.length > 2000) blueLedEvents.shift();
+
+        const ledTask = tasks.get(1);
+        if (ledTask) {
+          ledTask.recentlyActiveUntil = Date.now() + 350;
+          if (arg === 1) ledTask.runCount = (ledTask.runCount || 0) + 1;
+        }
+
+        if (arg === 1) {
+          if (lastBlueOnUs > 0 && timestampUs > lastBlueOnUs) {
+            const periodMs = (timestampUs - lastBlueOnUs) / 1000.0;
+            if (periodMs > 100 && periodMs < 2000) {
+              blinkPeriodText.textContent = periodMs.toFixed(1) + ' ms';
+            }
+          }
+          lastBlueOnUs = timestampUs;
+        }
+      } else if (type === 'R') {
+        // Red LED state: 0 or 1
+        redLedEvents.push({ state: arg, timestampUs });
+        if (redLedEvents.length > 1000) redLedEvents.shift();
+
+        const btnTask = tasks.get(3);
+        if (btnTask && arg === 1) {
+          btnTask.recentlyActiveUntil = Date.now() + 500;
+          btnTask.runCount = (btnTask.runCount || 0) + 1;
+        }
+
+        if (arg === 1 && lastButtonIrqUs > 0 && timestampUs >= lastButtonIrqUs) {
+          const latUs = timestampUs - lastButtonIrqUs;
+          if (latUs < 1000) {
+            latencyText.textContent = latUs + ' µs';
+          } else {
+            latencyText.textContent = (latUs / 1000.0).toFixed(2) + ' ms';
+          }
+          logConsole(`[PREEMPTION] Button Pressed! Latency to Red LED: ${latUs} µs`, 'preemption');
+        }
+      } else if (type === 'P') {
+        // Button IRQ event
+        lastButtonIrqUs = timestampUs;
+        buttonIrqEvents.push({ timestampUs });
+        if (buttonIrqEvents.length > 200) buttonIrqEvents.shift();
+        logConsole(`[IRQ] Pushbutton falling edge detected at ${timestampUs} µs`, 'preemption');
+      }
+    }
+
+    // Periodic CPU Usage recalculation (every 400ms)
     setInterval(() => {
       if (traceEvents.length < 2) return;
 
-      const windowUs = 1000000; // Last 1 second
+      const windowUs = 1000000; // 1 second window
       const startTime = latestTimestampUs > windowUs ? (latestTimestampUs - windowUs) : 0;
       let idleTimeUs = 0;
       let activeTimeUs = 0;
 
-      // Calculate execution intervals in current window
       const taskWindowTimes = new Map();
       tasks.forEach((_, id) => taskWindowTimes.set(id, 0));
 
@@ -644,10 +925,6 @@
         if (e1.type === 'I' && e2.timestampUs >= startTime) {
           const start = Math.max(e1.timestampUs, startTime);
           let end = Math.min(e2.timestampUs, latestTimestampUs);
-          // Cap non-idle task interval to 50ms in case a switch-out packet was dropped
-          if (e1.taskId !== 0 && (end - start) > 50000) {
-            end = start + 50000;
-          }
           if (end > start) {
             const dur = end - start;
             taskWindowTimes.set(e1.taskId, (taskWindowTimes.get(e1.taskId) || 0) + dur);
@@ -672,9 +949,7 @@
       cpuUsageText.textContent = cpuPercent.toFixed(1) + '%';
       cpuUsageBar.style.width = cpuPercent + '%';
       uptimeText.textContent = `Uptime: ${(latestTimestampUs / 1000000).toFixed(1)}s`;
-
-      updateTaskTable();
-    }, 500);
+    }, 400);
 
     // Canvas Gantt Rendering Loop
     function resizeCanvas() {
@@ -692,104 +967,197 @@
       const width = canvas.width / window.devicePixelRatio;
       const height = canvas.height / window.devicePixelRatio;
 
-      ctx.fillStyle = '#090d16';
+      ctx.fillStyle = '#060911';
       ctx.fillRect(0, 0, width, height);
 
       if (tasks.size === 0) return;
 
       const taskArray = Array.from(tasks.values()).sort((a, b) => b.priority - a.priority);
-      const rowHeight = (height - 40) / taskArray.length;
-      const labelWidth = 130;
-      const chartWidth = width - labelWidth - 20;
+      const totalLanes = taskArray.length + 2; // Tasks + Blue LED lane + Red LED lane
+      const rowHeight = (height - 35) / totalLanes;
+      const labelWidth = 120;
+      const chartWidth = width - labelWidth - 16;
 
       const timeEndUs = latestTimestampUs;
       const timeStartUs = Math.max(0, timeEndUs - WINDOW_SPAN_US);
 
-      // Draw grid lines & time markers
+      // Grid lines & time markers
       ctx.strokeStyle = '#1e293b';
       ctx.lineWidth = 1;
-      const timeStepUs = 200000; // 200ms grid divisions
+      const timeStepUs = WINDOW_SPAN_US / 10;
       const firstTick = Math.ceil(timeStartUs / timeStepUs) * timeStepUs;
 
-      ctx.fillStyle = '#64748b';
+      ctx.fillStyle = '#475569';
       ctx.font = '10px monospace';
 
       for (let t = firstTick; t <= timeEndUs; t += timeStepUs) {
         const x = labelWidth + ((t - timeStartUs) / WINDOW_SPAN_US) * chartWidth;
         ctx.beginPath();
         ctx.moveTo(x, 0);
-        ctx.lineTo(x, height - 25);
+        ctx.lineTo(x, height - 20);
         ctx.stroke();
 
-        const secStr = (t / 1000000).toFixed(1) + 's';
-        ctx.fillText(secStr, x - 12, height - 10);
+        const secStr = (t / 1000000).toFixed(2) + 's';
+        ctx.fillText(secStr, x - 14, height - 6);
       }
 
-      // Draw Rows & Task Execution Blocks
+      // Draw Task Rows
       taskArray.forEach((task, idx) => {
-        const y = idx * rowHeight + 10;
+        const y = idx * rowHeight + 6;
 
-        // Row background alternating
-        ctx.fillStyle = (idx % 2 === 0) ? 'rgba(30, 41, 59, 0.4)' : 'rgba(15, 23, 42, 0.4)';
-        ctx.fillRect(labelWidth, y, chartWidth, rowHeight - 6);
+        ctx.fillStyle = (idx % 2 === 0) ? 'rgba(30, 41, 59, 0.35)' : 'rgba(15, 23, 42, 0.35)';
+        ctx.fillRect(labelWidth, y, chartWidth, rowHeight - 4);
 
-        // Task Label
         ctx.fillStyle = task.color;
         ctx.font = 'bold 11px sans-serif';
-        ctx.fillText(task.name, 12, y + rowHeight / 2 - 2);
+        ctx.fillText(task.name, 10, y + rowHeight / 2 - 2);
 
         ctx.fillStyle = '#64748b';
-        ctx.font = '10px sans-serif';
-        ctx.fillText(`Prio ${task.priority}`, 12, y + rowHeight / 2 + 10);
+        ctx.font = '9px sans-serif';
+        ctx.fillText(`Prio ${task.priority}`, 10, y + rowHeight / 2 + 10);
       });
 
-      // Draw active execution rectangles
+      // Draw Hardware Signal Lanes (Blue LED and Red LED)
+      const blueLedLaneY = taskArray.length * rowHeight + 6;
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.08)';
+      ctx.fillRect(labelWidth, blueLedLaneY, chartWidth, rowHeight - 4);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText('Blue LED (P4_17)', 10, blueLedLaneY + rowHeight / 2 + 3);
+
+      const redLedLaneY = (taskArray.length + 1) * rowHeight + 6;
+      ctx.fillStyle = 'rgba(248, 113, 113, 0.08)';
+      ctx.fillRect(labelWidth, redLedLaneY, chartWidth, rowHeight - 4);
+      ctx.fillStyle = '#f87171';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText('Red LED (P4_18)', 10, redLedLaneY + rowHeight / 2 + 3);
+
+      // Draw Task Execution Blocks
       for (let i = 0; i < traceEvents.length - 1; i++) {
         const e1 = traceEvents[i];
         const e2 = traceEvents[i + 1];
 
         if (e1.type === 'I' && e2.timestampUs >= timeStartUs && e1.timestampUs <= timeEndUs) {
-          const task = tasks.get(e1.taskId);
-          if (!task) continue;
-
           const rowIdx = taskArray.findIndex(t => t.id === e1.taskId);
           if (rowIdx === -1) continue;
 
-          const y = rowIdx * rowHeight + 12;
-          const blockHeight = rowHeight - 10;
+          const y = rowIdx * rowHeight + 8;
+          const blockHeight = rowHeight - 8;
 
           const startUs = Math.max(e1.timestampUs, timeStartUs);
           let endUs = Math.min(e2.timestampUs, timeEndUs);
-          // Cap non-idle tasks to 50ms (50,000 us) to prevent dropped packets from drawing a solid wall
-          if (e1.taskId !== 0 && (endUs - startUs) > 50000) {
-            endUs = startUs + 50000;
-          }
+          const x1 = labelWidth + ((startUs - timeStartUs) / WINDOW_SPAN_US) * chartWidth;
+          const x2 = labelWidth + ((endUs - timeStartUs) / WINDOW_SPAN_US) * chartWidth;
+          const w = Math.max(3, x2 - x1); // Ensure minimum visible width for microsecond tasks
+
+          ctx.fillStyle = taskArray[rowIdx].color;
+          ctx.beginPath();
+          ctx.roundRect(x1, y, w, blockHeight, 2);
+          ctx.fill();
+        }
+      }
+
+      // Draw Blue LED Signal Bars
+      for (let i = 0; i < blueLedEvents.length; i++) {
+        const b1 = blueLedEvents[i];
+        const nextTime = (i + 1 < blueLedEvents.length) ? blueLedEvents[i + 1].timestampUs : timeEndUs;
+        if (b1.state === 1 && nextTime >= timeStartUs && b1.timestampUs <= timeEndUs) {
+          const startUs = Math.max(b1.timestampUs, timeStartUs);
+          const endUs = Math.min(nextTime, timeEndUs);
           const x1 = labelWidth + ((startUs - timeStartUs) / WINDOW_SPAN_US) * chartWidth;
           const x2 = labelWidth + ((endUs - timeStartUs) / WINDOW_SPAN_US) * chartWidth;
           const w = Math.max(2, x2 - x1);
 
-          ctx.fillStyle = task.color;
-          ctx.beginPath();
-          ctx.roundRect(x1, y, w, blockHeight, 3);
-          ctx.fill();
+          ctx.fillStyle = 'rgba(56, 189, 248, 0.7)';
+          ctx.fillRect(x1, blueLedLaneY + 4, w, rowHeight - 12);
         }
       }
+
+      // Draw Red LED Signal Bars
+      for (let i = 0; i < redLedEvents.length; i++) {
+        const r1 = redLedEvents[i];
+        const nextTime = (i + 1 < redLedEvents.length) ? redLedEvents[i + 1].timestampUs : timeEndUs;
+        if (r1.state === 1 && nextTime >= timeStartUs && r1.timestampUs <= timeEndUs) {
+          const startUs = Math.max(r1.timestampUs, timeStartUs);
+          const endUs = Math.min(nextTime, timeEndUs);
+          const x1 = labelWidth + ((startUs - timeStartUs) / WINDOW_SPAN_US) * chartWidth;
+          const x2 = labelWidth + ((endUs - timeStartUs) / WINDOW_SPAN_US) * chartWidth;
+          const w = Math.max(2, x2 - x1);
+
+          ctx.fillStyle = 'rgba(248, 113, 113, 0.85)';
+          ctx.fillRect(x1, redLedLaneY + 4, w, rowHeight - 12);
+        }
+      }
+
+      // Draw RFID Tag Scan Markers on RFID_Read row
+      const rfidRowIdx = taskArray.findIndex(t => t.id === 2);
+      if (rfidRowIdx !== -1) {
+        const y = rfidRowIdx * rowHeight + 6;
+        rfidScanEvents.forEach(evt => {
+          if (evt.timestampUs >= timeStartUs && evt.timestampUs <= timeEndUs) {
+            const x = labelWidth + ((evt.timestampUs - timeStartUs) / WINDOW_SPAN_US) * chartWidth;
+
+            ctx.save();
+            ctx.fillStyle = '#10b981';
+            ctx.strokeStyle = '#34d399';
+            ctx.lineWidth = 1;
+
+            // Draw diamond tag marker
+            ctx.beginPath();
+            ctx.moveTo(x, y + 2);
+            ctx.lineTo(x + 5, y + rowHeight / 2 - 2);
+            ctx.lineTo(x, y + rowHeight - 6);
+            ctx.lineTo(x - 5, y + rowHeight / 2 - 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Tag Hash text
+            ctx.font = 'bold 9px monospace';
+            ctx.fillText(evt.hash, x + 7, y + rowHeight / 2 + 1);
+            ctx.restore();
+          }
+        });
+      }
+
+      // Draw Button IRQ Markers
+      buttonIrqEvents.forEach(irq => {
+        if (irq.timestampUs >= timeStartUs && irq.timestampUs <= timeEndUs) {
+          const x = labelWidth + ((irq.timestampUs - timeStartUs) / WINDOW_SPAN_US) * chartWidth;
+
+          ctx.save();
+          ctx.strokeStyle = '#f87171';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, height - 20);
+          ctx.stroke();
+
+          ctx.setLineDash([]);
+          ctx.fillStyle = '#f87171';
+          ctx.font = 'bold 9px sans-serif';
+          ctx.fillText('⚡ IRQ (SW3)', x + 3, 14);
+          ctx.restore();
+        }
+      });
     }
 
-    // Web Serial API Communication
+    // Web Serial API
     async function connectSerial() {
       if (!('serial' in navigator)) {
-        alert('Web Serial API is not supported in this browser. Please use Chrome, Edge, or Opera.');
+        alert('Web Serial API is not supported in this browser. Please use Google Chrome or Microsoft Edge.');
         return;
       }
 
       try {
         port = await navigator.serial.requestPort();
-        await port.open({ baudRate: 115200 });
+        const selectedBaud = parseInt(baudSelect.value, 10);
+        await port.open({ baudRate: selectedBaud });
 
         keepReading = true;
         statusDot.className = 'status-dot connected';
-        statusText.textContent = 'Connected (115200)';
+        statusText.textContent = `Connected (${selectedBaud})`;
         connectBtn.textContent = 'Disconnect';
         connectBtn.className = 'btn-danger';
 
@@ -833,7 +1201,7 @@
           if (value) {
             buffer += value;
             const lines = buffer.split('\n');
-            buffer = lines.pop(); // Keep incomplete line
+            buffer = lines.pop();
 
             for (const line of lines) {
               processLine(line);
@@ -857,27 +1225,21 @@
 
     pauseBtn.addEventListener('click', () => {
       isPaused = !isPaused;
-      pauseBtn.textContent = isPaused ? 'Resume Stream' : 'Pause Stream';
+      pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
       pauseBtn.style.background = isPaused ? '#dc2626' : '';
     });
 
     clearBtn.addEventListener('click', () => {
       traceEvents.length = 0;
-      eventCounter.textContent = '0 events captured';
-    });
-
-    exportBtn.addEventListener('click', () => {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
-        exportTime: new Date().toISOString(),
-        tasks: Array.from(tasks.values()),
-        events: traceEvents
-      }, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `RTOScope_Trace_${Date.now()}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
+      blueLedEvents.length = 0;
+      redLedEvents.length = 0;
+      buttonIrqEvents.length = 0;
+      rfidScanEvents.length = 0;
+      eventCounter.textContent = '0 events';
+      dropWarningBanner.style.display = 'none';
+      dropCounter.textContent = 'Drops: 0';
+      dropCounter.style.color = 'var(--text-muted)';
+      droppedEventCount = 0;
     });
 
     // Start
